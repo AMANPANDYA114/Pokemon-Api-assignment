@@ -101,11 +101,10 @@ function Api() {
                     <p key={index}>{stat.stat.name}: {stat.base_stat}</p>
                   ))}
                   <p>Abilities:-</p>
-                  {pokemonDetails.abilities && pokemonDetails.abilities.length > 0 ? (
-                    <p>Ability: {pokemonDetails.abilities[0].ability.name}</p>
-                  ) : (
-                    <p>No abilities found</p>
-                  )}
+                  {pokemonDetails.abilities && pokemonDetails.abilities.length > 0 && (
+  <p>Ability: {pokemonDetails.abilities[0].ability.name}</p>
+)}
+
                 </div>
               )}
             </div>
