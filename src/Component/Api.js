@@ -1,29 +1,31 @@
+
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Api() {
-  const [datas, setDatas] = useState([]);
+  const [pokemonList, setPokemonList] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [pokemonDetails, setPokemonDetails] = useState({});
   const [selectedPokemon, setSelectedPokemon] = useState(null);
-  const [offset, setOffset] = useState(10); 
-  const maxOffset = 30; 
+  const [currentPage, setCurrentPage] = useState(1);
+  const limit = 10;
 
   useEffect(() => {
     fetchPokemonList();
-  }, [offset]);
+  }, [currentPage]); // Fetch Pokemon list whenever currentPage changes
 
   const fetchPokemonList = () => {
-    fetch(`https://pokeapi.co/api/v2/pokemon/?limit=10&offset=${offset}`)
-      .then((resp) => resp.json())
-      .then((data) => setDatas(data.results));
+    if (currentPage === 1) {
+      fetch('https://pokeapi.co/api/v2/pokemon')
+        .then((resp) => resp.json())
+        .then((data) => setPokemonList(data.results));
+    } else {
+      const currentOffset = (currentPage - 1) * limit;
+      fetch(`https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=${currentOffset}`)
+        .then((resp) => resp.json())
+        .then((data) => setPokemonList(data.results));
+    }
   };
-
-  useEffect(() => {
-    fetch('https://pokeapi.co/api/v2/pokemon')
-      .then((resp) => resp.json())
-      .then((data) => setDatas(data.results));
-  }, []);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -45,18 +47,18 @@ function Api() {
   };
 
   const handleNextPage = () => {
-    if (offset < maxOffset) {
-      setOffset(offset + 10);
+    if (currentPage < 3) {
+      setCurrentPage(currentPage + 1);
     }
   };
 
   const handlePrevPage = () => {
-    if (offset > 10) {
-      setOffset(offset - 10);
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
-  const filteredData = datas.filter((val) =>
+  const filteredData = pokemonList.filter((val) =>
     val.name.toLowerCase().startsWith(searchQuery.toLowerCase())
   );
 
@@ -79,7 +81,7 @@ function Api() {
                 className='btn btn-primary mt-3 d-flex justify-content-center'
                 onClick={() => toggleDetails(pokemon)}
               >
-                {selectedPokemon === pokemon.name ? 'Show more details' : 'Show more details'}
+                {selectedPokemon === pokemon.name ? 'Show More  details' : 'Show More  details'}
               </button>
 
               {/* Render details for each Pokémon */}
@@ -94,31 +96,35 @@ function Api() {
                     <span key={index}>{type.type.name} </span>
                   ))}</p>
 
-                  <p>States:-</p>
+                  <p>Stats:-</p>
                   {pokemonDetails.stats && pokemonDetails.stats.map((stat, index) => (
                     <p key={index}>{stat.stat.name}: {stat.base_stat}</p>
                   ))}
                   <p>Abilities:-</p>
-                  {pokemonDetails.abilities && pokemonDetails.abilities.map((ability, index) => (
-                    <p key={index}>{ability.ability.name}</p>
-                  ))}
+                  {pokemonDetails.abilities && pokemonDetails.abilities.length > 0 ? (
+                    <p>Ability: {pokemonDetails.abilities[0].ability.name}</p>
+                  ) : (
+                    <p>No abilities found</p>
+                  )}
                 </div>
               )}
             </div>
           ))
         ) : (
           <div className='fs-4 shown' style={{ fontSize: '30px' }}>
-            Sorry,  Pokemon name not found  !
+            Sorry, Pokemon name not found!
           </div>
         )}
       </div>
       <div className="pagination justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <button className="btn btn-primary " onClick={handlePrevPage} disabled={offset === 10}>Previous</button>
-        <span className="page-number mx-4">Page {Math.floor(offset / 10) + 0}</span>
-        <button className="btn btn-primary" onClick={handleNextPage} disabled={offset + 10 > maxOffset}>Next</button>
+        <button className="btn btn-primary " onClick={handlePrevPage} disabled={currentPage === 1}>Previous</button>
+        <span className="page-number mx-4">Page {currentPage}</span>
+        <button className="btn btn-primary" onClick={handleNextPage} disabled={currentPage === 3}>Next</button>
       </div>
     </div>
   );
 }
 
 export default Api;
+
+
