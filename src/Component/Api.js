@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,11 +11,11 @@ function Api() {
 
   useEffect(() => {
     fetchPokemonList();
-  }, [currentPage]); // Fetch Pokemon list whenever currentPage changes
+  }, [currentPage]); 
 
   const fetchPokemonList = () => {
     if (currentPage === 1) {
-      fetch('https://pokeapi.co/api/v2/pokemon')
+      fetch(`https://pokeapi.co/api/v2/pokemon/?limit=${limit}&offset=0`)
         .then((resp) => resp.json())
         .then((data) => setPokemonList(data.results));
     } else {
@@ -125,5 +124,3 @@ function Api() {
 }
 
 export default Api;
-
-
